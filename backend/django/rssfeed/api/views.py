@@ -1,16 +1,35 @@
 from functools import reduce
 from operator import and_, or_
+from api.classes.authenticated_view import AllowPostOnlyPermission, AuthenticatedView
 from api.helpers.response_helpers import build_bulk_response
-from api.models import Article
-from api.serializers import ArticleSerializer
+from api.models import Article, Profile
+from api.serializers import ArticleSerializer, ProfileSerializer
 from rest_framework.response import Response
 from django.db.models import Q
-
+from django.contrib.auth.models import User
 from rssfeed.pagination import CustomPagination
 from rest_framework.generics import GenericAPIView
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authtoken.models import Token
 
 
-class ArticleViewSet(GenericAPIView):
+class AuthenticationView(GenericAPIView):
+    # get token for user
+    def post(self, request):
+        try:
+            user = User.objects.get(username=request.data['username'])
+            if user.check_password(request.data['password']):
+                token, created = Token.objects.get_or_create(user=user)
+                return Response(status=status.HTTP_200_OK, data={'token': token.key})
+            else:
+                return Response(status=status.HTTP_401_UNAUTHORIZED, data={'error': 'Invalid password'})
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={'error': 'Invalid credentials'})
+
+
+class ArticleViewSet(AuthenticatedView):
     """
     API endpoint that allows articles to be viewed or edited.
     """
@@ -75,7 +94,7 @@ class ArticleViewSet(GenericAPIView):
         return queryset
 
 
-class GamerfetaminaViewSet(GenericAPIView):
+class GamerfetaminaViewSet(AuthenticatedView):
     """
     API endpoint that allows articles to be viewed or edited.
     """
@@ -115,3 +134,58 @@ class GamerfetaminaViewSet(GenericAPIView):
     def filter_queryset(self, queryset):
         queryset = queryset.order_by('-published_date')
         return queryset
+
+
+class HelloView(AuthenticatedView):
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+
+class UserView(AllowPostOnlyPermission):
+
+    def get(self, request, **kwargs):
+        # check if username exists. If it does, return the user User
+        # if it doesn't, return 404
+        # username comes from the url
+        username = kwargs['username'] if 'username' in kwargs else None
+
+        if username is not None:
+            try:
+                user = Profile.objects.get(user__username=username)
+                serializer = ProfileSerializer(user)
+                return Response(status=200, data=serializer.data)
+            except Exception as e:
+                return Response(status=404, data={'error': str(e)})
+        else:
+            user = Profile.objects.get(user=request.user)
+            serializer = ProfileSerializer(user)
+            return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    def post(self, request):
+        username = request.data.get('username', '')
+        password = request.data.get('password', '')
+
+        if username == '' or password == '':
+            return Response({
+                'message': 'username and password are required'
+            }, status=400)
+
+        try:
+            # create a new User and save it
+            new_user = User.objects.create_user(
+                username=username, password=password)
+            return Response({
+                'message': 'User created successfully'
+            }, status=201)
+        except Exception as e:
+
+            # if exception is a unique constraint violation, show "username already exists"
+            # otherwise, show the exception
+            if 'UNIQUE constraint failed' in str(e):
+                error_message = 'Username already exists'
+            else:
+                error_message = str(e)
+
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'error': error_message})

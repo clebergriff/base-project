@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Article
+from .models import Article, Profile, User
 from rest_framework.response import Response
 
 
@@ -20,3 +20,17 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
         fields = ('title', 'description',
                   'url', 'thumbnail', 'published_date', 'language')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', )
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ('username', 'bio', 'location', 'birth_date')
