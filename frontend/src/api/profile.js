@@ -1,15 +1,16 @@
 import axios from "axios";
-import { API_URL } from "../helpers/constants";
+import { API_ENDPOINT, API_URL } from "../helpers/constants";
 
 const METHODS = {
   GET: "GET",
   POST: "POST",
+  PATCH: "PATCH",
 };
 
 export const communicateAPI = async (endpoint, method, data, extraHeaders) => {
   let response = {};
   try {
-    const url = `${API_URL}${endpoint}`;
+    const url = `${API_URL}${API_ENDPOINT}${endpoint}`;
     const headers = {
       "Content-Type": "application/json",
       ...extraHeaders,
@@ -59,5 +60,12 @@ export const getUser = async (username = null) => {
 
 export const createUser = async (login) => {
   const response = await communicateAPI("/profile/", METHODS.POST, login);
+  return response;
+};
+
+export const updateProfile = async (profile) => {
+  const response = await communicateAPI("/profile/", METHODS.PATCH, profile, {
+    Authorization: `Token ${localStorage.getItem("token")}`,
+  });
   return response;
 };

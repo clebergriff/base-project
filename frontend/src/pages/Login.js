@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { showAPIResponse } from "../api/helpers";
+import { checkUserProfileByToken, showAPIResponse } from "../api/helpers";
 import { createUser, getUser, postToken } from "../api/profile";
 import { profileAtom } from "../states/user";
 import "./Login.css";
@@ -19,20 +19,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [profile, setProfile] = useRecoilState(profileAtom);
   const isLoginMode = mode === MODES.LOGIN;
-
-  useEffect(() => {
-    // check if token is in local storage and load profile
-    const token = localStorage.getItem("token");
-    if (token) {
-      checkUserProfileByToken();
-    }
-  }, []);
-
-  const checkUserProfileByToken = async () => {
-    const resp = await getUser();
-    if (!!resp.error) showAPIResponse(resp.error);
-    else setProfile(resp.data);
-  };
 
   const checkUserProfileByName = async (username) => {
     const response = await postToken(username);
@@ -69,14 +55,6 @@ const Login = () => {
             <h1>Usuário logado</h1>
             <p>Nome: {profile.username}</p>
             <p>Id: {profile.id}</p>
-            <button
-              onClick={() => {
-                localStorage.removeItem("token");
-                setProfile(null);
-              }}
-            >
-              Logout
-            </button>
           </div>
         ) : (
           <>

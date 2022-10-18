@@ -1,7 +1,16 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { checkUserProfileByToken } from "../api/helpers";
+import AccountButton from "./AccountButton";
 
 const Navigation = () => {
   const imgSrc = "https://via.placeholder.com/150";
+
+  useEffect(() => {
+    // check if token is in local storage and load profile
+    const token = localStorage.getItem("token");
+    if (token) checkUserProfileByToken();
+  }, []);
 
   return (
     <div className="flex flex-col mx-auto flex-wrap p-5 md:flex-row items-center">
@@ -20,9 +29,7 @@ const Navigation = () => {
         <Link className="mr-5 hover:text-gray-900" to="/about">
           Sobre
         </Link>
-        <Link className="mr-5 hover:text-gray-900" to="/login">
-          Login
-        </Link>
+        <AccountButton />
       </nav>
     </div>
   );

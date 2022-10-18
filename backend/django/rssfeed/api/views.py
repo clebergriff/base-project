@@ -1,9 +1,13 @@
+import base64
 from functools import reduce
+import io
 from operator import and_, or_
+import os
+import re
 from api.classes.authenticated_view import AllowPostOnlyPermission, AuthenticatedView
 from api.helpers.response_helpers import build_bulk_response
-from api.models import Article, Profile
-from api.serializers import ArticleSerializer, ProfileSerializer
+from api.models import Article, ImageModel, Profile
+from api.serializers import ArticleSerializer, ImageSerializer, ProfileSerializer
 from rest_framework.response import Response
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -11,8 +15,8 @@ from rssfeed.pagination import CustomPagination
 from rest_framework.generics import GenericAPIView
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.authtoken.models import Token
+from PIL import Image
 
 
 class AuthenticationView(GenericAPIView):
@@ -145,23 +149,34 @@ class HelloView(AuthenticatedView):
 
 class UserView(AllowPostOnlyPermission):
 
-    def get(self, request, **kwargs):
-        # check if username exists. If it does, return the user User
-        # if it doesn't, return 404
-        # username comes from the url
-        username = kwargs['username'] if 'username' in kwargs else None
+    serializer_class = ProfileSerializer
 
-        if username is not None:
-            try:
-                user = Profile.objects.get(user__username=username)
-                serializer = ProfileSerializer(user)
-                return Response(status=200, data=serializer.data)
-            except Exception as e:
-                return Response(status=404, data={'error': str(e)})
-        else:
+    # create a listener for patch requests
+    def patch(self, request, format=None):
+        profile = request.user.profile
+        data = request.data
+        # if thumbnail is not a url, convert it to an image
+        if 'thumbnail' in data:
+            thumbnail = data['thumbnail']
+            if thumbnail and not thumbnail.startswith('http'):
+                image = ImageModel.create_from_base64(thumbnail)
+                data['thumbnail'] = image.url
+            else:
+                data.pop('thumbnail', None)
+
+        serializer = self.get_serializer(profile, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=200, data=serializer.data)
+        return Response(status=400, data=serializer.errors)
+
+    def get(self, request, **kwargs):
+        if request.user.is_authenticated:
             user = Profile.objects.get(user=request.user)
-            serializer = ProfileSerializer(user)
-            return Response(status=status.HTTP_200_OK, data=serializer.data)
+            serializer = self.get_serializer(user)
+            return Response(status=200, data=serializer.data)
+        else:
+            return Response(status=401, data={'error': 'User not authenticated'})
 
     def post(self, request):
         username = request.data.get('username', '')
@@ -174,8 +189,7 @@ class UserView(AllowPostOnlyPermission):
 
         try:
             # create a new User and save it
-            new_user = User.objects.create_user(
-                username=username, password=password)
+            User.objects.create_user(username=username, password=password)
             return Response({
                 'message': 'User created successfully'
             }, status=201)
@@ -189,3 +203,32 @@ class UserView(AllowPostOnlyPermission):
                 error_message = str(e)
 
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'error': error_message})
+
+
+class ImageUploadView(AllowPostOnlyPermission):
+
+    serializer_class = ImageSerializer
+
+    def get(self, request):
+        # bring file temp_gLChhCM.png from the server
+        # and send it to the client
+        file_name = request.path.split('/')[-1]
+        file_path = os.path.join('', file_name)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                return Response(f.read(), status=200)
+        else:
+            return Response(status=404, data={'error': 'File not found'})
+
+    def post(self, request):
+        # this endpoint will receive a image field as Base 64, convert it to WebP and save it
+        # and return the url of the image
+        data = request.data
+        if 'image' in data:
+            image = ImageModel.create_from_base64(data['image'])
+            return Response(status=200, data={'url': image.url})
+        else:
+            return Response(status=400, data={'error': 'image field is required'})
+
+    class Meta:
+        model = ImageModel

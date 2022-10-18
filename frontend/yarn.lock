@@ -7260,6 +7260,11 @@ react-error-overlay@^6.0.11:
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.11.tgz#92835de5841c5cf08ba00ddd2d677b6d17ff9adb"
   integrity sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==
 
+react-icons@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.6.0.tgz#f83eda179af5d02c047449a20b702c858653d397"
+  integrity sha512-rR/L9m9340yO8yv1QT1QurxWQvWpbNHqVX0fzMln2HEb9TEIrQRGsqiNFQfiv9/JEUbyHmHPlNTB2LWm2Ttz0g==
+
 react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
@@ -7350,6 +7355,11 @@ react-scripts@5.0.1:
   optionalDependencies:
     fsevents "^2.3.2"
 
+react-select-search@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/react-select-search/-/react-select-search-4.1.2.tgz#83ce54646f450c8256ea8414e7419d0f6e4b8151"
+  integrity sha512-r8mvyZzGFb1ps9Rte6F+iNewNgCamjUkpgcjEdTdbRR6gy8RcHCmB9O7Iocnk39ND/ag7UUO9WMHKpgOHg/rrg==
+
 react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
@@ -7392,6 +7402,11 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+recoil-nexus@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/recoil-nexus/-/recoil-nexus-0.4.0.tgz#3d69b197a6006d287ee4457dd774eb98950dc5be"
+  integrity sha512-4ZgTXy+e5WvO54qh6Oir4LAYNevuxVxldyCTovevMVjU7fM/UO9t7RzY26G3tKGlHbFaECL3l25Kezl9ZLos6g==
 
 recoil@^0.7.6:
   version "0.7.6"

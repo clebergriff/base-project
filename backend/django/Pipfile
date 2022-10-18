@@ -9,8 +9,10 @@ markdown = "*"
 django-filter = "*"
 djangorestframework = "*"
 django-cors-headers = "*"
+webp = "*"
 
 [dev-packages]
+autopep8 = "*"
 
 [requires]
 python_version = "3.9"
