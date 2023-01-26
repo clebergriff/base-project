@@ -20,7 +20,7 @@ const Navigation = () => {
           className="object-contain h-16 rounded-full border-2 border-gray-300"
           src={imgSrc}
         />
-        <span className="ml-3 text-xl">Redelícia</span>
+        <span className="ml-3 text-xl">Base Project</span>
       </div>
       <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
         <Link className="mr-5 hover:text-gray-900" to="/">

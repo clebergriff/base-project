@@ -11,7 +11,7 @@ from api.serializers import ArticleSerializer, ImageSerializer, ProfileSerialize
 from rest_framework.response import Response
 from django.db.models import Q
 from django.contrib.auth.models import User
-from rssfeed.pagination import CustomPagination
+from base.pagination import CustomPagination
 from rest_framework.generics import GenericAPIView
 from rest_framework import status
 from rest_framework.response import Response
